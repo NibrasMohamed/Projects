@@ -1,0 +1,142 @@
+
+#include <Arduino.h>
+#include <SoftwareSerial.h>
+SoftwareSerial Blue(2, 3);
+char data = 0;
+
+int Nuetral = 4;
+int val= 0;
+int stat= 0 ;
+
+
+
+void setup() {
+
+
+
+
+pinMode( 8 , OUTPUT);
+      digitalWrite( 8 , HIGH);
+pinMode( 9 , OUTPUT);
+    digitalWrite( 9 , HIGH);
+pinMode( 10 , OUTPUT);
+    digitalWrite( 10 , HIGH);
+pinMode( 11 , OUTPUT);
+    digitalWrite( 11 , HIGH);
+pinMode( LED_BUILTIN, OUTPUT);
+
+pinMode( Nuetral, INPUT);
+
+
+
+
+
+Serial.begin(9600);
+Blue.begin(9600);
+
+
+}
+
+
+
+
+void loop() {
+
+val = digitalRead(Nuetral);
+stat = digitalRead(8);
+
+while(Blue.available()==0);
+
+if (val == HIGH)
+{
+  Serial.println("Nuetral");
+} 
+
+
+  if (Blue.available()>0)
+  {
+    data= Blue.read();      //Reading The Data from The Bluetooth
+    Serial.println(data);
+
+
+  }
+  
+  if (data == 'A')            //Key Switch
+  { 
+    if (stat == HIGH)
+    {
+          digitalWrite(8, LOW);
+          digitalWrite(10, LOW);
+          Blue.print('A');
+          Serial.println("KEY ON");
+          Serial.println("RunOff off");
+   
+    } 
+  }
+
+    else if (data == 'B')       //Self start
+  {
+    if (val == HIGH && stat == LOW )
+    {
+     Blue.print('B');
+    digitalWrite(9, LOW);
+    digitalWrite(10, LOW);
+    Serial.println("Self ON");
+    }else
+    {
+      Blue.print('x');
+    }
+    
+   
+    
+  }
+
+    else if (data == 'b')       //Self startoff
+  {
+    digitalWrite(9, HIGH);      
+    Serial.println("Self OFF");
+    
+  }
+    
+    else if (data == 'X')      //Key Off
+  {
+    digitalWrite(8, HIGH); 
+    digitalWrite(10, HIGH);
+    Serial.println("Key OFF");
+    Blue.print('C');
+  } 
+  
+   else if (data == 'Z' && stat == LOW)        //Run OFF
+  {
+    Serial.println("Run OFF");
+    Blue.print('D');
+    digitalWrite(10, HIGH);
+    delay(3000);
+    digitalWrite(10, LOW);
+  }
+
+  else if (data == 'P')     //Parking Lights
+  {
+    digitalWrite(11, LOW);
+    Serial.println("Parking On");
+    Blue.print('E');
+    
+  }
+  
+  else if (data == 'p')     //Parking Lights off
+  {
+    digitalWrite(11, HIGH);
+    Serial.println("Parking Off");
+    Blue.print('e');
+    
+  }
+
+  else
+  {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(200);
+    digitalWrite(LED_BUILTIN, LOW);
+
+  }
+  
+}
